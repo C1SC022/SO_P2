@@ -180,47 +180,63 @@ static int goalieConstituteTeam (int id)
     }
 
     /* TODO: insert your code here */
-    if(sh->fSt.goaliesArrived >= NUMGOALIES){
+    sh->fSt.goaliesFree++;
+    printf("sh->fSt.goaliesArrived: %d\n", sh->fSt.goaliesArrived);
+    printf("playersFree: %d\n", sh->fSt.playersFree);
+    if(sh->fSt.goaliesArrived==NUMGOALIES){ 
         sh->fSt.st.goalieStat[id] = LATE;
         saveState (nFic, &sh->fSt);
-        if (semUp (semgid, sh->mutex) == -1) {                                                         /* exit critical region */
-            perror ("error on the down operation for semaphore access (GL)");
-            exit (EXIT_FAILURE);
-        }
-        return ret;
-    }
-    sh->fSt.st.goalieStat[id] = WAITING_TEAM;
-    sh->fSt.goaliesFree++;
-    saveState (nFic, &sh->fSt);
-   
-    printf("sh->fSt.goaliesFree: %d\n", sh->fSt.goaliesFree);
-    printf("sh->fSt.playersFree: %d\n", sh->fSt.playersArrived);
-    if(sh->fSt.goaliesFree == NUMGOALIES && sh->fSt.playersFree >= NUMTEAMPLAYERS){
-        printf("Goalie %d is forming team\n", id);
-        sh->fSt.goaliesFree --;
-        sh->fSt.playersFree -= NUMTEAMPLAYERS;
-        ret = sh->fSt.teamId++;
+        sh->fSt.goaliesFree--;
+    } else if(sh->fSt.playersFree>=NUMTEAMPLAYERS){
         sh->fSt.st.goalieStat[id] = FORMING_TEAM;
-        saveState (nFic, &sh->fSt);
-        if (semUp (semgid, sh->mutex) == -1) {                                                         /* exit critical region */
-            perror ("error on the down operation for semaphore access (GL)");
-            exit (EXIT_FAILURE);
-        }
-    } 
 
-    
-    
+        sh->fSt.playersFree-=NUMTEAMPLAYERS;
+        sh->fSt.goaliesFree-=NUMTEAMGOALIES;
+
+        for(int i=0; i<NUMTEAMPLAYERS; i++){
+            if (semUp (semgid, sh->playersWaitTeam) == -1) {                                                         /* exit critical region */
+                perror ("error on the down operation for semaphore access (GL)");
+                exit (EXIT_FAILURE);
+            }
+        }
+        
+        for(int i=0; i<NUMTEAMPLAYERS; i++){
+            if (semDown (semgid, sh->playerRegistered) == -1) {                                                         /* exit critical region */
+                perror ("error on the down operation for semaphore access (GL)");
+                exit (EXIT_FAILURE);
+            }
+        }
+        ret = sh->fSt.teamId;
+        sh->fSt.teamId++;
+        saveState (nFic, &sh->fSt);
+    } else {
+        sh->fSt.st.goalieStat[id] = WAITING_TEAM;
+        saveState (nFic, &sh->fSt);
+    }
+
     if (semUp (semgid, sh->mutex) == -1) {                                                         /* exit critical region */
-        perror ("error on the down operation for semaphore access (GL)");
+        perror ("error on the up operation for semaphore access (GL)");
         exit (EXIT_FAILURE);
     }
 
     /* TODO: insert your code here */
-    if (semUp (semgid, sh->playerRegistered) == -1) {                                                         /* exit critical region */
-        perror ("error on the down operation for semaphore access (GL)");
+    if(sh->fSt.st.goalieStat[id] == WAITING_TEAM){
+        if (semDown (semgid, sh->goaliesWaitTeam) == -1)  {                                                     /* enter critical region */
+            perror ("error on the up operation for semaphore access (GL)");
+            exit (EXIT_FAILURE);
+        }
+        ret = sh->fSt.teamId;
+
+        if (semDown (semgid, sh->playerRegistered) == -1)  {                                                     /* enter critical region */
+            perror ("error on the up operation for semaphore access (GL)");
+            exit (EXIT_FAILURE);
+        }
+    } else if (sh->fSt.st.goalieStat[id] == FORMING_TEAM){
+        if (semUp (semgid, sh->refereeWaitTeams) == -1) {                                                         /* exit critical region */
+        perror ("error on the up operation for semaphore access (GL)");
         exit (EXIT_FAILURE);
     }
-
+    }
     return ret;
 }
 

@@ -186,6 +186,10 @@ static void waitForTeams ()
         perror("error on the up operation for semaphore access (RF)");
         exit(EXIT_FAILURE);
     }
+    if(semDown(semgid, sh->refereeWaitTeams) == -1){
+        perror("error on the up operation for semaphore access (RF)");
+        exit(EXIT_FAILURE);
+    }
 
 }
 
@@ -213,9 +217,11 @@ static void startGame ()
     }
 
     /* TODO: insert your code here */
-    if(semUp(semgid, sh->playing) == -1){
-        perror("error on the up operation for semaphore access (RF)");
-        exit(EXIT_FAILURE);
+    for(int i = 0; i < NUMPLAYERS; i++){
+        if(semUp(semgid, sh->playersWaitReferee) == -1){
+            perror("error on the up operation for semaphore access (RF)");
+            exit(EXIT_FAILURE);
+        }
     }
 
 }
@@ -270,9 +276,11 @@ static void endGame ()
     }
 
     /* TODO: insert your code here */
-    if(semUp(semgid, sh->playersWaitEnd) == -1){
-        perror("error on the up operation for semaphore access (RF)");
-        exit(EXIT_FAILURE);
+    for(int i = 0; i < NUMPLAYERS; i++){
+        if(semUp(semgid, sh->playersWaitEnd) == -1){
+            perror("error on the up operation for semaphore access (RF)");
+            exit(EXIT_FAILURE);
+        }
     }
 
 }
