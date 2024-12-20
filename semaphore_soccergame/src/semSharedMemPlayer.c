@@ -195,7 +195,7 @@ static int playerConstituteTeam (int id)
         sh->fSt.playersFree -= NUMTEAMPLAYERS;
         sh->fSt.goaliesFree -= NUMTEAMGOALIES;
 
-        for (int i = 0; i < 3 - 1; i++) {
+        for (int i = 0; i < 3; i++) {
             if (semUp(semgid, sh->playersWaitTeam) == -1) {
                 perror("error on the up operation for semaphore access (PL)");
                 exit(EXIT_FAILURE);
@@ -211,8 +211,7 @@ static int playerConstituteTeam (int id)
                 exit (EXIT_FAILURE);
             }
         }
-        ret = sh->fSt.teamId;
-        sh->fSt.teamId++;
+        ret = sh->fSt.teamId++;
         saveState (nFic, &sh->fSt);
 
     } else {

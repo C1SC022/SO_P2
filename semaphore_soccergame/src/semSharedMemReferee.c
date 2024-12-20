@@ -182,13 +182,11 @@ static void waitForTeams ()
     }
 
     /* TODO: insert your code here */
-    if(semDown(semgid, sh->refereeWaitTeams) == -1){
-        perror("error on the up operation for semaphore access (RF)");
-        exit(EXIT_FAILURE);
-    }
-    if(semDown(semgid, sh->refereeWaitTeams) == -1){
-        perror("error on the up operation for semaphore access (RF)");
-        exit(EXIT_FAILURE);
+    for (int i = 0; i < 2; i++) {
+        if(semDown(semgid, sh->refereeWaitTeams) == -1){
+            perror("error on the up operation for semaphore access (RF)");
+            exit(EXIT_FAILURE);
+        }
     }
 
 }

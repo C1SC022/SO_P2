@@ -144,7 +144,6 @@ static void arrive(int id)
 
     /* TODO: insert your code here */
     sh->fSt.st.goalieStat[id] = ARRIVING;
-    sh->fSt.goaliesArrived++;
     saveState (nFic, &sh->fSt);
     
     if (semUp (semgid, sh->mutex) == -1) {                                                         /* exit critical region */
@@ -181,13 +180,15 @@ static int goalieConstituteTeam (int id)
 
     /* TODO: insert your code here */
     sh->fSt.goaliesFree++;
+    sh->fSt.goaliesArrived++;
+
     printf("sh->fSt.goaliesArrived: %d\n", sh->fSt.goaliesArrived);
     printf("playersFree: %d\n", sh->fSt.playersFree);
     if(sh->fSt.goaliesArrived==NUMGOALIES){ 
         sh->fSt.st.goalieStat[id] = LATE;
         saveState (nFic, &sh->fSt);
         sh->fSt.goaliesFree--;
-    } else if(sh->fSt.playersFree>=NUMTEAMPLAYERS){
+    } else if(sh->fSt.playersFree>=NUMTEAMPLAYERS && sh->fSt.goaliesFree>=NUMTEAMGOALIES){
         sh->fSt.st.goalieStat[id] = FORMING_TEAM;
 
         sh->fSt.playersFree-=NUMTEAMPLAYERS;
@@ -206,8 +207,7 @@ static int goalieConstituteTeam (int id)
                 exit (EXIT_FAILURE);
             }
         }
-        ret = sh->fSt.teamId;
-        sh->fSt.teamId++;
+        ret = sh->fSt.teamId++;
         saveState (nFic, &sh->fSt);
     } else {
         sh->fSt.st.goalieStat[id] = WAITING_TEAM;
