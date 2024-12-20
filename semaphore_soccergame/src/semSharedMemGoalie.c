@@ -182,33 +182,31 @@ static int goalieConstituteTeam (int id)
     sh->fSt.goaliesFree++;
     sh->fSt.goaliesArrived++;
 
-    printf("sh->fSt.goaliesArrived: %d\n", sh->fSt.goaliesArrived);
-    printf("playersFree: %d\n", sh->fSt.playersFree);
     if(sh->fSt.goaliesArrived==NUMGOALIES){ 
+        
         sh->fSt.st.goalieStat[id] = LATE;
         saveState (nFic, &sh->fSt);
-        sh->fSt.goaliesFree--;
     } else if(sh->fSt.playersFree>=NUMTEAMPLAYERS && sh->fSt.goaliesFree>=NUMTEAMGOALIES){
         sh->fSt.st.goalieStat[id] = FORMING_TEAM;
-
         sh->fSt.playersFree-=NUMTEAMPLAYERS;
         sh->fSt.goaliesFree-=NUMTEAMGOALIES;
+        
 
         for(int i=0; i<NUMTEAMPLAYERS; i++){
             if (semUp (semgid, sh->playersWaitTeam) == -1) {                                                         /* exit critical region */
-                perror ("error on the down operation for semaphore access (GL)");
+                perror ("error on the down operation for semaphore access (GL)\n");
                 exit (EXIT_FAILURE);
             }
         }
-        
         for(int i=0; i<NUMTEAMPLAYERS; i++){
-            if (semDown (semgid, sh->playerRegistered) == -1) {                                                         /* exit critical region */
-                perror ("error on the down operation for semaphore access (GL)");
-                exit (EXIT_FAILURE);
-            }
+            if (semUp(semgid, sh->playerRegistered) == -1) {
+        perror("error on the up operation for semaphore access (PL)");
+        exit(EXIT_FAILURE);
+    }
         }
         ret = sh->fSt.teamId++;
         saveState (nFic, &sh->fSt);
+        printf("ret salvei: %d\n", ret);
     } else {
         sh->fSt.st.goalieStat[id] = WAITING_TEAM;
         saveState (nFic, &sh->fSt);

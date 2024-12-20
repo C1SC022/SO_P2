@@ -191,10 +191,8 @@ static int playerConstituteTeam (int id)
     }
     else if(sh->fSt.playersFree >= NUMTEAMPLAYERS && sh->fSt.goaliesFree >= NUMTEAMGOALIES){
         sh->fSt.st.playerStat[id] = FORMING_TEAM;
-
         sh->fSt.playersFree -= NUMTEAMPLAYERS;
         sh->fSt.goaliesFree -= NUMTEAMGOALIES;
-
         for (int i = 0; i < 3; i++) {
             if (semUp(semgid, sh->playersWaitTeam) == -1) {
                 perror("error on the up operation for semaphore access (PL)");
@@ -206,14 +204,14 @@ static int playerConstituteTeam (int id)
             exit(EXIT_FAILURE);
         }
         for(int i = 0; i < NUMTEAMPLAYERS; i++){
-            if (semDown (semgid, sh->playerRegistered) == -1) {                                                         /* exit critical region */
-                perror ("error on the down operation for semaphore access (PL)");
-                exit (EXIT_FAILURE);
-            }
+            if (semUp(semgid, sh->playerRegistered) == -1) {
+                perror("error on the up operation for semaphore access (PL)");
+            exit(EXIT_FAILURE);
+        }
         }
         ret = sh->fSt.teamId++;
         saveState (nFic, &sh->fSt);
-
+        printf("ret salvei: %d\n", ret);
     } else {
         sh->fSt.st.playerStat[id] = WAITING_TEAM;
         saveState (nFic, &sh->fSt);
@@ -241,7 +239,7 @@ static int playerConstituteTeam (int id)
             exit (EXIT_FAILURE);
         }
     }
-
+    printf("ret: %d\n", ret);
     return ret;
 }
 
