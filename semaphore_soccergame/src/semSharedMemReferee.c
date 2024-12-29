@@ -143,7 +143,7 @@ static void arrive ()
     }
 
     /* TODO: insert your code here */
-    sh->fSt.st.refereeStat = ARRIVING;  
+    sh->fSt.st.refereeStat = ARRIVINGR;  
     saveState(nFic, &sh->fSt);                                                                    // update referee state with arriving state
 
     if (semUp (semgid, sh->mutex) == -1) {                                                        /* leave critical region */
@@ -217,7 +217,12 @@ static void startGame ()
             perror("error on the up operation for semaphore access (RF)");
             exit(EXIT_FAILURE);
         }
+        if(semDown(semgid, sh->playing) == -1){                                                       // wait for players and goalies to finish match
+            perror("error on the up operation for semaphore access (RF)");
+            exit(EXIT_FAILURE);
+        }
     }
+
 
 }
 
@@ -243,7 +248,7 @@ static void play ()
         perror ("error on the up operation for semaphore access (RF)");
         exit (EXIT_FAILURE);
     }
-
+    
     usleep((100.0*random())/(RAND_MAX+1.0)+900.0);
 }
 

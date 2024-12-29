@@ -273,6 +273,10 @@ static void waitReferee (int id, int team)
         exit (EXIT_FAILURE);
     }
 
+    if(semUp(semgid, sh->playing) == -1){                                                       // wait for players and goalies to finish match
+        perror("error on the up operation for semaphore access (GL)");
+        exit(EXIT_FAILURE);
+    }
 }
 
 /**
@@ -301,6 +305,7 @@ static void playUntilEnd (int id, int team)
     }
 
     /* TODO: insert your code here */
+    
     if (semDown (semgid, sh->playersWaitEnd) == -1)  {                                                   // wait for referee to end match
         perror ("error on the up operation for semaphore access (PL)");
         exit (EXIT_FAILURE);
