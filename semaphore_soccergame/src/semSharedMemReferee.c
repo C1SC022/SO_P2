@@ -143,7 +143,7 @@ static void arrive ()
     }
 
     /* TODO: insert your code here */
-    sh->fSt.st.refereeStat = ARRIVING;  
+    sh->fSt.st.refereeStat = ARRIVINGR;  
     saveState(nFic, &sh->fSt);                                                                    // update referee state with arriving state
 
     if (semUp (semgid, sh->mutex) == -1) {                                                        /* leave critical region */
