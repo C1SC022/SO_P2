@@ -217,7 +217,7 @@ static void startGame ()
             perror("error on the up operation for semaphore access (RF)");
             exit(EXIT_FAILURE);
         }
-        if(semDown(semgid, sh->playing) == -1){                                                       // wait for players and goalies to finish match
+        if(semDown(semgid, sh->playing) == -1){                                                       // wait for players and goalies to be ready
             perror("error on the up operation for semaphore access (RF)");
             exit(EXIT_FAILURE);
         }
