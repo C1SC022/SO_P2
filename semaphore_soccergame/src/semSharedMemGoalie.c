@@ -300,7 +300,7 @@ static void playUntilEnd (int id, int team)
     }
 
     /* TODO: insert your code here */
-     if(semUp(semgid, sh->playing) == -1){                                                       // notify referee to start match
+     if(semUp(semgid, sh->playing) == -1){                                                       // notify that goalies are playing
         perror("error on the up operation for semaphore access (GL)");
         exit(EXIT_FAILURE);
     }
