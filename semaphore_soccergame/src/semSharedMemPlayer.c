@@ -302,8 +302,8 @@ static void playUntilEnd (int id, int team)
     }
 
     /* TODO: insert your code here */
-    if(semUp(semgid, sh->playing) == -1){                                                       // wait for players and goalies to finish match
-        perror("error on the up operation for semaphore access (GL)");
+    if(semUp(semgid, sh->playing) == -1){                                                       // notify that players are playing
+        perror("error on the up operation for semaphore access (PL)");
         exit(EXIT_FAILURE);
     }
     if (semDown (semgid, sh->playersWaitEnd) == -1)  {                                                   // wait for referee to end match
